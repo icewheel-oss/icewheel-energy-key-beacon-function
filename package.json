@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Single-file Google Cloud Function that serves a client-side web app.",
   "author": "Rohit Khatkar <khatkarrohit@gmail.com>",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/icewheel-oss/icewheel-energy-key-beacon-function.git"
