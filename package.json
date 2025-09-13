@@ -1,0 +1,26 @@
+{
+  "name": "icewheel-energy-key-beacon-cloud-function",
+  "version": "1.0.0",
+  "description": "Single-file Google Cloud Function that serves a client-side web app.",
+  "main": "index.js",
+  "type": "module",
+  "license": "GPL-3.0-or-later",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "functions-framework --target=beacon --port=8080",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "dependencies": {
+    "@google-cloud/functions-framework": "^3.3.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.7",
+    "@babel/preset-env": "^7.24.7",
+    "@jest/globals": "^29.7.0",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0"
+  }
+}
