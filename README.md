@@ -6,6 +6,10 @@ This project provides a minimal, single-file, self-contained web application des
     - `GET /.well-known/appspecific/com.tesla.3p.public-key.pem` → Serves your configured public key (PEM).
 2.  **Provides a User Interface**: It offers a simple web page to generate a partner token, register your domain, and verify the setup, with all API calls happening securely on the server side.
 
+### Demo
+
+A demo deployment for development environment is at [https://beacon-function.icewheel.dev/](https://beacon-function.icewheel.dev/) to try only and then users can do their own deployment
+
 This guide focuses on deploying the application to **Google Cloud Run**, which is the recommended platform.
 
 ### Disclaimer
