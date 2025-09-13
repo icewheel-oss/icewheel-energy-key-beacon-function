@@ -3,6 +3,9 @@ name: Node.js Package
 on:
   release:
     types: [created]
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -16,6 +19,7 @@ jobs:
       - run: npm test
 
   publish-npm:
+    if: github.event_name == 'release'
     needs: build
     runs-on: ubuntu-latest
     steps:
