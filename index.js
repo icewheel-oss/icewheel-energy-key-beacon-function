@@ -257,7 +257,7 @@ function renderIndexHtml(publicKey) {
 
     <footer class="pt-4 pb-3">
         <hr />
-        <div class="alert alert-info mt-4"><h5 class="alert-heading"><i class="bi bi-shield-check"></i> Your Data Stays in Your Browser</h5><p>This is a fully client-side application. All data you enter, including your Client ID and Secret, is processed directly in your browser and is <strong>never sent to or stored on our server</strong>. The only network requests made are directly from your browser to the official Tesla API endpoints.</p><hr><p class="mb-0"><strong>You can verify this claim:</strong> Open your browser's Developer Tools (F12 or Ctrl+Shift+I), go to the "Network" tab, and observe the requests made when you use the forms.</p></div>
+        <div class="alert alert-info mt-4"><h5 class="alert-heading"><i class="bi bi-shield-check"></i> Security and Data Privacy</h5><p>This application acts as a secure backend proxy to communicate with the Tesla Fleet API. When you enter your credentials (Client ID and Secret), they are sent directly to this server, which then uses them to obtain a partner token from Tesla. <strong>Your credentials are not stored on this server and are only used for the duration of the API request.</strong></p><hr><p class="mb-0">All API calls to Tesla are made from this server, not from your browser. This is a security best practice that helps protect your credentials.</p></div>
         <div class="text-center text-muted mt-4"><small>Copyright &copy; 2025 Icewheel LLC. All Rights Reserved.<span class="mx-2">&middot;</span><a href="https://github.com/icewheel-oss/icewheel-energy-key-beacon/" target="_blank" rel="noopener noreferrer" class="text-muted text-decoration-none">GitHub</a></small></div>
     </footer>
 
@@ -394,13 +394,20 @@ export async function beacon(req, res) {
     if (req.method === 'POST') {
       const body = await parseJson(req);
       if (path.endsWith('/get-token')) {
-        const { clientId, clientSecret } = body;
+        let { clientId, clientSecret } = body;
         if (!clientId || !clientSecret) return sendJson(res, 400, { error: 'clientId and clientSecret are required' });
 
-        const params = new URLSearchParams({ grant_type: 'client_credentials', client_id: clientId, client_secret: clientSecret, scope: 'openid user_data vehicle_device_data vehicle_cmds vehicle_charging_cmds energy_device_data energy_cmds offline_access', audience: REGION_URLS.na });
-        const apiResponse = await fetch(TESLA_AUTH_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: params });
-        const data = await apiResponse.json().catch(() => ({}));
-        return sendJson(res, apiResponse.status, data);
+        try {
+            const params = new URLSearchParams({ grant_type: 'client_credentials', client_id: clientId, client_secret: clientSecret, scope: 'openid user_data vehicle_device_data vehicle_cmds vehicle_charging_cmds energy_device_data energy_cmds offline_access', audience: REGION_URLS.na });
+            const apiResponse = await fetch(TESLA_AUTH_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: params });
+            const data = await apiResponse.json().catch(() => ({}));
+            if (!apiResponse.ok) throw new Error(data.error || 'Failed to get token');
+            return sendJson(res, apiResponse.status, data);
+        } finally {
+            // Explicitly clear secrets
+            clientId = null;
+            clientSecret = null;
+        }
       }
 
       if (path.endsWith('/register') || path.endsWith('/verify')) {
