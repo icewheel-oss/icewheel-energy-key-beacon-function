@@ -157,7 +157,15 @@ function renderIndexHtml(publicKey) {
           <div class="card-header"><strong><i class="bi bi-key"></i> 1. Your Public Key</strong></div>
           <div class="card-body">
             ${keyBlock}
-            ${publicKey ? `<div class="mt-2"><button id="copyKeyBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-clipboard"></i> Copy</button></div>` : ''}
+            ${publicKey ? `
+            <div class="d-flex justify-content-between align-items-center mt-2">
+              <a href="/.well-known/appspecific/com.tesla.3p.public-key.pem" target="_blank" class="btn btn-outline-success btn-sm">
+                <i class="bi bi-box-arrow-up-right"></i> Verify Key URL
+              </a>
+              <button id="copyKeyBtn" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-clipboard"></i> Copy
+              </button>
+            </div>` : ''}
           </div>
         </div>
 
