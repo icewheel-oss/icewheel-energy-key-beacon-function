@@ -36,51 +36,42 @@ This method uses the inline editor in the Google Cloud Console, so you don't nee
 
 1.  **Navigate to Cloud Run**:
     - Go to the [Google Cloud Run](https://console.cloud.google.com/run) page in the Google Cloud Console.
-    - Click **Create Service**.
+    - Click **"Write a function"**.
 
-2.  **Configure the Service**:
-    - Select **Deploy new revision from source code**.
-    - Click **Use online editor** to open the code editor directly in your browser.
+2.  **Initial Service Configuration**:
+    - **Service name**: Choose a name for your service (e.g., `icewheel-energy-beacon`).
+    - **Region**: Select a region close to you.
+    - **Runtime**: Choose **Node.js 22** (or a suitable version).
+    - **Authentication**: Select **"Allow unauthenticated invocations"**.
+    - **Billing**: Choose your preferred option.
 
-3.  **Add the Code**:
-    - **`index.js`**: Copy the entire content of the `index.js` file from this project and paste it into the `index.js` file in the editor.
-    - **`package.json`**: Click the **`+`** icon to add a new file. Name it `package.json`. Copy the content of this project's `package.json` file and paste it into the new file you just created.
+3.  **Advanced Settings**:
+    - **Scaling**: Set **Minimum number of instances** to `0` and **Maximum number of instances** to `1`.
+    - **Ingress**: Select **"All"**.
+    - **Container**: Set **Memory** to **256MB** (128MB is also fine) and **CPU** to **1**.
+    - **Variables & Secrets**: Add an environment variable with the **Name** `TESLA_PUBLIC_KEY` and your public key as the **Value**.
 
-4.  **Set the Entry Point (Important)**:
-    - In the **Build settings** section, find the **Entry point** field.
-    - Enter `beacon`. This tells Cloud Run which function in your code to execute when a request comes in.
+4.  **Create the Service**:
+    - Click **"Create"**. This will provision the service and take you to the inline editor.
 
-5.  **Set Service Details**:
-    - Give your service a **Service name** (e.g., `icewheel-energy-beacon`).
-    - Choose a **Region** close to you.
-
-6.  **Allow Public Access**:
-    - Under **Authentication**, select **Allow unauthenticated invocations**. This makes your web app public so you can access it.
-
-7.  **Configure Environment Variable (Your Public Key)**:
-    - Expand the **Container, Networking, Security** section.
-    - Go to the **Variables & Secrets** tab.
-    - Under **Environment variables**, click **Add Variable**.
-    - Set the **Name** to `TESLA_PUBLIC_KEY`.
-    - Set the **Value** to your full public key content (including the `-----BEGIN...` and `-----END...` lines).
-
-8.  **Optimize for Cost (Important)**:
-    - Go to the **Container** tab.
-    - Under **Auto-scaling**, set the **Minimum number of instances** to **`0`**. This is the key to saving money, as it allows your app to "sleep" and not incur costs when idle.
-    - Set the **Maximum number of instances** to **`1`**. This acts as a safety measure to prevent your app from scaling up and causing unexpected costs.
-
-9.  **Deploy**:
-    - Click **Deploy** and wait for the process to complete. You can now access your service at the URL provided!
+5.  **Add Code and Deploy**:
+    - In the editor, you will see `index.js` and `package.json` files.
+    - **`index.js`**: Replace the default content with the content of this project's `index.js` file.
+    - **`package.json`**: Replace the default content with the content of this project's `package.json` file.
+    - **Entry point**: Set the **Function entry point** to `beacon`.
+    - Click **"Save and redeploy"** to deploy your function.
 
 ### Option 2: Deploy via the Command Line (`gcloud`)
 
-If you have the `gcloud` command-line tool installed, you can deploy the service with a single command. Run this from the `cloud-function` directory. The entry point is handled automatically by the `start` script in `package.json` when using this method.
+If you have the `gcloud` command-line tool installed, you can deploy the service with a single command from the project's root directory.
 
 ```sh
-# Make sure to replace YOUR_PUBLIC_KEY with your actual PEM key content
-gcloud run deploy icewheel-energy-beacon \
+# Make sure to replace YOUR_SERVICE_NAME, YOUR_REGION, and YOUR_PUBLIC_KEY
+gcloud run deploy YOUR_SERVICE_NAME \
   --source . \
-  --region us-central1 \
+  --region YOUR_REGION \
+  --runtime nodejs22 \
+  --entry-point beacon \
   --allow-unauthenticated \
   --set-env-vars="TESLA_PUBLIC_KEY=YOUR_PUBLIC_KEY" \
   --min-instances=0 \
@@ -88,12 +79,34 @@ gcloud run deploy icewheel-energy-beacon \
 ```
 
 **What this command does:**
-- `gcloud run deploy`: Tells Google to deploy a Cloud Run service.
+- `gcloud run deploy YOUR_SERVICE_NAME`: Deploys a Cloud Run service with the name you provide.
 - `--source .`: Uploads the code from your current directory.
+- `--region YOUR_REGION`: Specifies the Google Cloud region for the deployment.
+- `--runtime nodejs22`: Sets the runtime environment to Node.js 22.
+- `--entry-point beacon`: Specifies the name of the function to execute.
 - `--allow-unauthenticated`: Makes the web app publicly accessible.
 - `--set-env-vars`: Sets your Tesla public key as an environment variable.
 - `--min-instances=0`: Sets the service to scale to zero to save costs.
-- `--max-instances=1`: Prevents the service from scaling beyond one instance, acting as a cost-control measure.
+- `--max-instances=1`: Prevents the service from scaling beyond one instance.
+
+---
+
+### Verification
+
+After deploying your service, you can verify that the public key is being served correctly by visiting the following URL in your browser:
+
+`https://YOUR_SERVICE_URL/.well-known/appspecific/com.tesla.3p.public-key.pem`
+
+Replace `YOUR_SERVICE_URL` with the URL of your deployed Cloud Run service. You should see your public key displayed in the browser.
+
+---
+
+### Optional: Custom Domain Mapping
+
+If you own a domain name, you can map it to your Cloud Run service to use a custom URL.
+
+1.  After your service is deployed, navigate to the **"Domain mappings"** section from the left-side menu in the Cloud Run page.
+2.  Follow the instructions to add a new domain mapping and verify your domain ownership.
 
 ---
 
